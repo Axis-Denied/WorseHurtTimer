@@ -1,14 +1,15 @@
 [
   {
     "modid": "betterhurttimer",
-    "name": "Better Hurt Timer",
-    "description": "i-Frame and hurt animation tweaker",
-    "version": "1.12.2-1.3.1.0",
+    "name": "Worse Hurt Timer",
+    "description": "i-Frame and hurt animation tweaker, but forked to work with EnderSkills and Mixinbooter.",
+    "version": "1.12.2-1.5.0.1",
     "mcversion": "1.12.2",
     "url": "https://www.curseforge.com/minecraft/mc-mods/better-hurt-timer-bht",
     "updateUrl": "",
     "authorList": [
-      "Arekkuusu"
+      "Arekkuusu",
+      "roguetictac"
     ],
     "logoFile": "assets/betterhurttimer/logo.png",
     "screenshots": [],

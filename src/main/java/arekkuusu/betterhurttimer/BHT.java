@@ -24,14 +24,15 @@ import java.util.regex.Pattern;
         name = BHT.MOD_NAME,
         version = BHT.MOD_VERSION,
         acceptedMinecraftVersions = "[1.12.2]",
-        certificateFingerprint = "72cd337644e68ff7257f69b2927894048793e577"
+        dependencies="required:mixinbooter"
+        //certificateFingerprint = "72cd337644e68ff7257f69b2927894048793e577"
 )
 public class BHT {
 
     //Useful names
     public static final String MOD_ID = "betterhurttimer";
     public static final String MOD_NAME = "Better Hurt Timer";
-    public static final String MOD_VERSION = "1.12.2-1.3.0.0";
+    public static final String MOD_VERSION = "1.12.2-1.5.0.1";
     public static final String SERVER_PROXY = "arekkuusu." + MOD_ID + ".common.ServerProxy";
     public static final String CLIENT_PROXY = "arekkuusu." + MOD_ID + ".client.ClientProxy";
 
@@ -98,9 +99,11 @@ public class BHT {
     public void onServerLoad(FMLServerStartingEvent event) {
         event.registerServerCommand(new CommandExport());
     }
-
+    /*
     @EventHandler
     public void onFingerprintViolation(FMLFingerprintViolationEvent event) {
         LOG.warn("Invalid fingerprint detected!");
     }
+
+     */
 }
