@@ -85,6 +85,13 @@ dependencies {
     annotationProcessor ('zone.rong:mixinbooter:9.1') {
         transitive = false
     }
+    implementation(files("build/libs/ImmersiveCombat-3-22-2024.jar"))
+    implementation(files("build/libs/aether-1.12.2-v1.5.3.2.jar"))
+    implementation(files("build/libs/PotionCore-1.9_for_1.12.2-deobf.jar"))
+    implementation(files("build/libs/Nether-API-v1.3.0-mc1.12.2.jar"))
+    implementation(files("build/libs/geckolib-forge-1.12.2-3.0.31.jar"))
+    implementation(files("build/libs/Into The End - 0.5.jar"))
+
     /*
     if(isSponge) {
         compile 'org.spongepowered:mixin:0.8'

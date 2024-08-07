@@ -1,6 +1,8 @@
 package arekkuusu.betterhurttimer.api.capability.data;
 
+import arekkuusu.betterhurttimer.common.IForceAttack;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.util.DamageSource;
 
 import javax.annotation.Nonnull;
@@ -93,7 +95,11 @@ public class HurtSourceInfo {
 
         public void apply(Entity entity) {
             entity.hurtResistantTime = 0;
-            entity.attackEntityFrom(this.damageSource, this.amount);
+            if(entity instanceof IForceAttack){
+                ((IForceAttack) entity).wht$forceAttackEntityFrom(this.damageSource, this.amount);
+            }else{
+                entity.attackEntityFrom(this.damageSource, this.amount);
+            }
             entity.hurtResistantTime = 0;
             this.canApply = true;
             this.amount = 0;

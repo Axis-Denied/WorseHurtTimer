@@ -124,6 +124,7 @@ public class BHTConfig {
             };
         }
     }
+    public static boolean doLogging = false;
 
     public static class RenderValues {
         public final Rendering rendering = new Rendering();

@@ -21,9 +21,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.common.config.Config;
+import net.minecraftforge.common.config.ConfigManager;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
@@ -34,6 +37,14 @@ import java.util.Arrays;
 
 @Mod.EventBusSubscriber(modid = BHT.MOD_ID)
 public class Events {
+
+    @SubscribeEvent
+    public static void onConfigUpdated(ConfigChangedEvent.OnConfigChangedEvent event) {
+        if (event.getModID().equals(BHT.MOD_ID)) {
+            ConfigManager.sync(BHT.MOD_ID, Config.Type.INSTANCE);
+        }
+    }
+
 
     public static boolean onAttackEntityOverride = true;
     public static int maxHurtResistantTime = 20;
@@ -49,8 +60,10 @@ public class Events {
                     if (data.tick > 0) {
                         --data.tick;
                     }
+                    //if(event.getEntity() instanceof EntityPlayer) BHT.LOG.info("Ticking hurtmap for data {} with source {}", data, data.damageSource);
                     if (data.info.doFrames && data.tick == 0 && !data.canApply) {
                         Events.onAttackEntityOverride = false;
+                        if(BHTConfig.doLogging) BHT.LOG.info("Applying accumulated damage with amount {}", data.amount);
                         data.apply(event.getEntity());
                         Events.onAttackEntityOverride = true;
                     }
@@ -79,28 +92,63 @@ public class Events {
     public static void onAttackEntityFromPre(PreLivingAttackEvent event) {
         if (isClientWorld(event.getEntityLiving())) return;
         if (!Events.onAttackEntityOverride) return;
+        boolean log = BHTConfig.doLogging;
+        if(log){
+            BHT.LOG.info("Found a PreLivingAttackEvent, fired from {}, with amount {}", event.wasStalled() ? "ForgeHooks.onLivingAttack" : "EntityLivingBase.attackEntityFrom", event.getAmount());
+        }
         DamageSource source = event.getSource();
+        if(log){
+            BHT.LOG.info("Found a Damage Source {} with name {}", source, source.getDamageType());
+        }
         if (Events.isAttack(source)) return; //If my source is melee, return
-
+        if(log){
+            BHT.LOG.info("It is non-melee. Proceeding.");
+        }
         EntityLivingBase entity = event.getEntityLiving();
         HurtSourceData data = BHTAPI.get(entity, source);
+        if(log){
+            BHT.LOG.info("Got its HurtSourceData. The HurtInfo's frames behavior is: {}", data.info.doFrames);
+            BHT.LOG.info("Got its HurtSourceData. The HurtInfo's waitTime is: {}", data.info.waitTime);
+        }
+
         data.damageSource = source; //Last source to do the damage gets the kill
+        if(log) {
+            BHT.LOG.info("The data's pre-trigger amount is {}. This isn't the actual damage source's amount, just what WHT has stored for prior damage events.", data.amount);
+            BHT.LOG.info("The data's pre-trigger canApply is {}", data.canApply);
+            BHT.LOG.info("The data's pre-trigger tick value is {}", data.tick);
+            BHT.LOG.info("The data's pre-trigger lastHurtTick value is {}", data.lastHurtTick);
+        }
         if (data.tick == 0 && data.canApply) {
             data.trigger();
         }
-
+        if(log){
+            BHT.LOG.info("The data's canApply is {}", data.canApply);
+            BHT.LOG.info("The data's tick value is {}", data.tick);
+            BHT.LOG.info("The data's lastHurtTick value is {}", data.lastHurtTick);
+            BHT.LOG.info("The data's lastHurtAmount is {}", data.lastHurtAmount);
+        }
+        if(log) BHT.LOG.info("Checking if lastHurtTick is less than waitTime: {}", data.lastHurtTick < data.info.waitTime);
         if (data.info.doFrames) {
             if (data.lastHurtTick < data.info.waitTime) {
+                if(log) BHT.LOG.info("Accumulating damage, old amount: {}", data.amount);
                 data.accumulate(event.getAmount());
+                if(log){
+                    BHT.LOG.info("Accumulating damage, new amount: {}", data.amount);
+                    BHT.LOG.info("The damage event was also cancelled.");
+                }
                 event.setCanceled(true);
             }
         } else if (data.tick != 0) {
             float lastAmount = event.getAmount();
+            if(log) BHT.LOG.info("PreLivingAttackEvent's stored attack amount is {}", lastAmount);
             if (data.lastHurtTick < data.info.waitTime) {
+                if(log) BHT.LOG.info("Comparing to PreLivingAttackEvent's stored damage amount");
                 if (Double.compare(Math.max(0, data.lastHurtAmount + BHTConfig.CONFIG.damageFrames.nextAttackDamageDifference), event.getAmount()) < 0) {
                     event.setAmount(lastAmount - Math.max(0, data.lastHurtAmount));
+                    if(log) BHT.LOG.info("The attack will not be cancelled. It's new amount is {}", event.getAmount());
                     data.lastHurtAmount = lastAmount;
                 } else {
+                    if(log) BHT.LOG.info("WHT cancelled the attack. The HurtSourceData's lastHurtAmount + {} is below 0.", BHTConfig.CONFIG.damageFrames.nextAttackDamageDifference);
                     event.setCanceled(true);
                 }
             } else {
