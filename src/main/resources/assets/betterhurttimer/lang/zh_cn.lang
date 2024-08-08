@@ -1,0 +1,4 @@
+command.betterhurttimer.export.created=已创建导出文件
+command.betterhurttimer.export.overwritten=已覆盖导出文件
+command.betterhurttimer.export.successful=导出完成
+command.betterhurttimer.export.unsuccessful=导出失败
