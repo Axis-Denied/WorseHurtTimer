@@ -205,7 +205,7 @@ public class Events {
             //Calculate last hurt time required
             final AttackInfo attackInfo = capability.meleeMap.computeIfAbsent(target, BHTAPI.INFO_FUNCTION);
             if(BHTConfig.doLogging){
-                BHT.LOG.info("AttackInfo {}", attackInfo);
+                BHT.LOG.info("HurtCapability {}", capability);
             }
             if(BHTConfig.doLogging){
                 BHT.LOG.info("AttackInfo {}", attackInfo);
@@ -218,16 +218,17 @@ public class Events {
             int ticksSinceLastMelee = attackInfo.ticksSinceLastMelee;
             BHT.LOG.info("ticksSinceLastMelee: {}", ticksSinceLastMelee);
             if (ticksSinceLastMelee < ticksSinceLastHurt) {
-                BHT.LOG.info("What needs to be done");
+                BHT.LOG.info("Determining whether to override or cancel...");
                 // What needs to be done to fix other peoples shit.
                 if (attackInfo.ticksSinceLastMelee == 0 && (!(attacker instanceof EntityPlayer) || ((EntityPlayer) attacker).getCooledAttackStrength(0) == 0)) {
+                    BHT.LOG.info("OVERRIDE!");
                     attackInfo.override = true;
                 } else {
                     BHT.LOG.info("CANCELLED!");
                     event.setCanceled(true);
                 }
             } else {
-                BHT.LOG.info("Setting to 0");
+                BHT.LOG.info("Setting ticksSinceLastMelee to 0");
                 attackInfo.ticksSinceLastMelee = 0;
             }
         });
@@ -241,13 +242,13 @@ public class Events {
         }
         if (attacker instanceof EntityLivingBase && Events.canSwing((EntityLivingBase) attacker)) {
             if(BHTConfig.doLogging){
-                BHT.LOG.info("Cool period check!");
+                BHT.LOG.info("Checking the Cooldown Period");
             }
             return (int) (Events.getCoolPeriod((EntityLivingBase) attacker) * threshold);
         } else {
             double maxHurtResistantTime = Events.getHurtResistantTime(target);
             double attackerAttackSpeed = Events.getAttackSpeed(attacker);
-            BHT.LOG.info("The other one: {} {}", maxHurtResistantTime, attackerAttackSpeed);
+            BHT.LOG.info("Doing the standard hurtTime calculation: {} {}", maxHurtResistantTime, attackerAttackSpeed);
             return (int) (maxHurtResistantTime * (attackerAttackSpeed * threshold));
         }
     }
@@ -256,7 +257,7 @@ public class Events {
         ItemStack stack = entity.getHeldItem(EnumHand.MAIN_HAND);
         Item item = stack.getItem();
         if(BHTConfig.doLogging){
-            BHT.LOG.info("Canswing Check! {} {}",entity, stack);
+            BHT.LOG.info("Canswing Check! {} {}", entity, stack);
         }
         boolean canSwing = false;
         try {
