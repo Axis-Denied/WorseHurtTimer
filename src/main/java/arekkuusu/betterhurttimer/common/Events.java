@@ -23,16 +23,16 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.config.Config;
 import net.minecraftforge.common.config.ConfigManager;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 
 @Mod.EventBusSubscriber(modid = BHT.MOD_ID)
@@ -49,10 +49,21 @@ public class Events {
     public static boolean onAttackEntityOverride = true;
     public static int maxHurtResistantTime = 20;
 
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onFakePlayerUpdate(TickEvent.ServerTickEvent event) {
+        if(event.phase == TickEvent.Phase.END) Capabilities.FAKE_PLAYER_HURT_CAPABILITIES.forEach(Events::updateCapability);
+    }
+
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onEntityUpdate(LivingEvent.LivingUpdateEvent event) {
         if (isClientWorld(event.getEntity())) return;
-        Capabilities.hurt(event.getEntity()).ifPresent(capability -> {
+        Capabilities.hurt(event.getEntity()).ifPresent(capability -> updateCapability(event.getEntity(), capability));
+    }
+
+
+
+    public static void updateCapability(Entity entity, HurtCapability capability){
             //Source Damage i-Frames
             if (!capability.hurtMap.isEmpty()) {
                 capability.hurtMap.forEach((s, data) -> {
@@ -64,7 +75,7 @@ public class Events {
                     if (data.info.doFrames && data.tick == 0 && !data.canApply) {
                         Events.onAttackEntityOverride = false;
                         if(BHTConfig.doLogging) BHT.LOG.info("Applying accumulated damage with amount {}", data.amount);
-                        data.apply(event.getEntity());
+                        data.apply(entity);
                         Events.onAttackEntityOverride = true;
                     }
                 });
@@ -85,7 +96,7 @@ public class Events {
             } else {
                 capability.lastShieldDamage = 0;
             }
-        });
+
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -169,7 +180,7 @@ public class Events {
             Entity attacker = event.getEntityPlayer();
             int ticksSinceLastHurt = Events.getHurtTime(target, attacker);
             try {
-                int ticksSinceLastMelee = BHTAPI.field.getInt(event.getEntityPlayer());
+                int ticksSinceLastMelee = BHTAPI.ticksSinceLastSwingField.getInt(event.getEntityPlayer());
                 if (ticksSinceLastMelee > ticksSinceLastHurt) {
                     attackInfo.ticksSinceLastMelee = ticksSinceLastMelee;
                 }
@@ -187,19 +198,36 @@ public class Events {
         Entity target = event.getEntity();
         Entity attacker = source.getImmediateSource();
         Capabilities.hurt(attacker).ifPresent(capability -> {
+            if(BHTConfig.doLogging){
+                BHT.LOG.info("Found a Melee Damage Source {} with name {}", source, source.getDamageType());
+            }
 
             //Calculate last hurt time required
             final AttackInfo attackInfo = capability.meleeMap.computeIfAbsent(target, BHTAPI.INFO_FUNCTION);
+            if(BHTConfig.doLogging){
+                BHT.LOG.info("AttackInfo {}", attackInfo);
+            }
+            if(BHTConfig.doLogging){
+                BHT.LOG.info("AttackInfo {}", attackInfo);
+            }
+            if(BHTConfig.doLogging){
+                BHT.LOG.info("Found a Melee Damage Source {} with name {}", source, source.getDamageType());
+            }
             int ticksSinceLastHurt = Events.getHurtTime(target, attacker);
+            BHT.LOG.info("ticksSinceLastHurt: {}", ticksSinceLastHurt);
             int ticksSinceLastMelee = attackInfo.ticksSinceLastMelee;
+            BHT.LOG.info("ticksSinceLastMelee: {}", ticksSinceLastMelee);
             if (ticksSinceLastMelee < ticksSinceLastHurt) {
+                BHT.LOG.info("What needs to be done");
                 // What needs to be done to fix other peoples shit.
                 if (attackInfo.ticksSinceLastMelee == 0 && (!(attacker instanceof EntityPlayer) || ((EntityPlayer) attacker).getCooledAttackStrength(0) == 0)) {
                     attackInfo.override = true;
                 } else {
+                    BHT.LOG.info("CANCELLED!");
                     event.setCanceled(true);
                 }
             } else {
+                BHT.LOG.info("Setting to 0");
                 attackInfo.ticksSinceLastMelee = 0;
             }
         });
@@ -208,11 +236,18 @@ public class Events {
     public static int getHurtTime(Entity target, Entity attacker) {
         double threshold = Events.getThreshold(attacker);
 
+        if(BHTConfig.doLogging){
+            BHT.LOG.info("Threshold is {}", threshold);
+        }
         if (attacker instanceof EntityLivingBase && Events.canSwing((EntityLivingBase) attacker)) {
+            if(BHTConfig.doLogging){
+                BHT.LOG.info("Cool period check!");
+            }
             return (int) (Events.getCoolPeriod((EntityLivingBase) attacker) * threshold);
         } else {
             double maxHurtResistantTime = Events.getHurtResistantTime(target);
             double attackerAttackSpeed = Events.getAttackSpeed(attacker);
+            BHT.LOG.info("The other one: {} {}", maxHurtResistantTime, attackerAttackSpeed);
             return (int) (maxHurtResistantTime * (attackerAttackSpeed * threshold));
         }
     }
@@ -220,13 +255,22 @@ public class Events {
     public static boolean canSwing(EntityLivingBase entity) {
         ItemStack stack = entity.getHeldItem(EnumHand.MAIN_HAND);
         Item item = stack.getItem();
+        if(BHTConfig.doLogging){
+            BHT.LOG.info("Canswing Check! {} {}",entity, stack);
+        }
         boolean canSwing = false;
         try {
-            canSwing = BHTAPI.field.getInt(entity) >= 0 && item.getAttributeModifiers(
+            canSwing = BHTAPI.ticksSinceLastSwingField.getInt(entity) >= 0 && item.getAttributeModifiers(
                     EntityEquipmentSlot.MAINHAND,
                     stack
             ).containsKey(SharedMonsterAttributes.ATTACK_SPEED.getName());
+            if(BHTConfig.doLogging){
+                BHT.LOG.info("No try catch error!");
+            }
         } catch(Exception ignored) {
+        }
+        if(BHTConfig.doLogging){
+            BHT.LOG.info("Result {}", canSwing);
         }
         return canSwing;
     }
@@ -270,7 +314,11 @@ public class Events {
     }
 
     public static boolean isAttack(DamageSource source) {
-        return Arrays.asList(BHTConfig.CONFIG.attackFrames.attackSources).contains(source.getDamageType());
+        return isFakePlayer(source) || Arrays.asList(BHTConfig.CONFIG.attackFrames.attackSources).contains(source.getDamageType());
+    }
+
+    public static boolean isFakePlayer(DamageSource source){
+        return source.getTrueSource() instanceof FakePlayer;
     }
 
     @SubscribeEvent()

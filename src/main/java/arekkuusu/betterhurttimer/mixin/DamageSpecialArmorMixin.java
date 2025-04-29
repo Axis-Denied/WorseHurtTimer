@@ -3,8 +3,6 @@ package arekkuusu.betterhurttimer.mixin;
 import arekkuusu.betterhurttimer.BHTConfig;
 import arekkuusu.betterhurttimer.api.capability.Capabilities;
 import arekkuusu.betterhurttimer.api.capability.HurtCapability;
-import javax.annotation.Nonnull;
-
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
@@ -14,11 +12,13 @@ import net.minecraftforge.common.ISpecialArmor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+
+import javax.annotation.Nonnull;
 
 @Mixin(ISpecialArmor.ArmorProperties.class)
 public abstract class DamageSpecialArmorMixin {

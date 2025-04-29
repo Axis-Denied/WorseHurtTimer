@@ -2,8 +2,8 @@ package arekkuusu.betterhurttimer.api.capability.data;
 
 import arekkuusu.betterhurttimer.common.IForceAttack;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.util.DamageSource;
+import net.minecraftforge.common.util.FakePlayer;
 
 import javax.annotation.Nonnull;
 import java.util.regex.Pattern;
@@ -41,7 +41,7 @@ public class HurtSourceInfo {
         }
 
         @Override
-        public CharSequence subSequence(int start, int end) {
+        public @Nonnull CharSequence subSequence(int start, int end) {
             return type.subSequence(start, end);
         }
 
@@ -94,13 +94,15 @@ public class HurtSourceInfo {
         }
 
         public void apply(Entity entity) {
-            entity.hurtResistantTime = 0;
-            if(entity instanceof IForceAttack){
-                ((IForceAttack) entity).wht$forceAttackEntityFrom(this.damageSource, this.amount);
-            }else{
-                entity.attackEntityFrom(this.damageSource, this.amount);
+            if(!(entity instanceof FakePlayer)){
+                entity.hurtResistantTime = 0;
+                if(entity instanceof IForceAttack){
+                    ((IForceAttack) entity).wht$forceAttackEntityFrom(this.damageSource, this.amount);
+                }else{
+                    entity.attackEntityFrom(this.damageSource, this.amount);
+                }
+                entity.hurtResistantTime = 0;
             }
-            entity.hurtResistantTime = 0;
             this.canApply = true;
             this.amount = 0;
         }

@@ -9,10 +9,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLFingerprintViolationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
+import net.minecraftforge.fml.relauncher.FMLLaunchHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,9 +32,10 @@ public class BHT {
     //Useful names
     public static final String MOD_ID = "betterhurttimer";
     public static final String MOD_NAME = "Better Hurt Timer";
-    public static final String MOD_VERSION = "1.12.2-1.5.0.1";
+    public static final String MOD_VERSION = "1.12.2-1.5.0.2";
     public static final String SERVER_PROXY = "arekkuusu." + MOD_ID + ".common.ServerProxy";
     public static final String CLIENT_PROXY = "arekkuusu." + MOD_ID + ".client.ClientProxy";
+    public static final boolean DEV = FMLLaunchHandler.isDeobfuscatedEnvironment();
 
     @SidedProxy(serverSide = SERVER_PROXY, clientSide = CLIENT_PROXY)
     private static IProxy proxy;

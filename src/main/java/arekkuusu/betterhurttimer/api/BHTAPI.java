@@ -17,6 +17,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+import static arekkuusu.betterhurttimer.BHT.DEV;
+
 public final class BHTAPI {
 
     public static final Function<EntityLivingBase, Function<CharSequence, HurtSourceInfo>> HURT_SOURCE_INFO_FUNCTION = e -> s -> new HurtSourceInfo(s, false, e.maxHurtResistantTime);
@@ -26,10 +28,10 @@ public final class BHTAPI {
     public static final Map<ResourceLocation, Double> ATTACK_ITEM_THRESHOLD_MAP = new LinkedHashMap<>();
     public static final Function<Entity, AttackInfo> INFO_FUNCTION = u -> new AttackInfo();
 
-    public static Field field;
+    public static Field ticksSinceLastSwingField;
     static {
-        field = ObfuscationReflectionHelper.findField(EntityLivingBase.class, "field_184617_aD");
-        field.setAccessible(true);
+        ticksSinceLastSwingField = ObfuscationReflectionHelper.findField(EntityLivingBase.class, DEV ? "ticksSinceLastSwing" : "field_184617_aD");
+        ticksSinceLastSwingField.setAccessible(true);
     }
 
     public static void addSource(HurtSourceInfo info) {
