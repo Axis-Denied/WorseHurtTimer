@@ -32,7 +32,7 @@ public class BHT {
     //Useful names
     public static final String MOD_ID = "betterhurttimer";
     public static final String MOD_NAME = "Better Hurt Timer";
-    public static final String MOD_VERSION = "1.12.2-1.5.0.2";
+    public static final String MOD_VERSION = "1.12.2-1.5.0.3";
     public static final String SERVER_PROXY = "arekkuusu." + MOD_ID + ".common.ServerProxy";
     public static final String CLIENT_PROXY = "arekkuusu." + MOD_ID + ".client.ClientProxy";
     public static final boolean DEV = FMLLaunchHandler.isDeobfuscatedEnvironment();

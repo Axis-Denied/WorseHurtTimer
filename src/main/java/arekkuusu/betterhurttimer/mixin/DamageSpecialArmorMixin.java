@@ -3,6 +3,7 @@ package arekkuusu.betterhurttimer.mixin;
 import arekkuusu.betterhurttimer.BHTConfig;
 import arekkuusu.betterhurttimer.api.capability.Capabilities;
 import arekkuusu.betterhurttimer.api.capability.HurtCapability;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
@@ -95,6 +96,25 @@ public abstract class DamageSpecialArmorMixin {
     }
 
      */
+
+
+    @ModifyExpressionValue(
+            method = {"applyArmor(Lnet/minecraft/entity/EntityLivingBase;Lnet/minecraft/util/NonNullList;Lnet/minecraft/util/DamageSource;D)F"},
+            at = {@At(
+                    target = "Lnet/minecraftforge/common/ISpecialArmor$ArmorProperties;AbsorbRatio:D",
+                    value = "FIELD",
+                    ordinal = 0
+            )},
+            //locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+            remap = false
+    )
+    private static double storeValuesPatched(double absorbRatio, EntityLivingBase entity, NonNullList<ItemStack> inventory, DamageSource source, double damage, @Local(name="ratio") double ratio) {
+        absorbTemp = absorbRatio;
+        damageTemp = damage;
+        ratioTemp = ratio;
+        return absorbRatio;
+    }
+    /*
     @Inject(
             method = {"applyArmor(Lnet/minecraft/entity/EntityLivingBase;Lnet/minecraft/util/NonNullList;Lnet/minecraft/util/DamageSource;D)F"},
             at = {@At(
@@ -111,6 +131,7 @@ public abstract class DamageSpecialArmorMixin {
         damageTemp = damage;
         ratioTemp = ratio;
     }
+    */
     @Redirect(
             method = {"applyArmor(Lnet/minecraft/entity/EntityLivingBase;Lnet/minecraft/util/NonNullList;Lnet/minecraft/util/DamageSource;D)F"},
             at = @At(

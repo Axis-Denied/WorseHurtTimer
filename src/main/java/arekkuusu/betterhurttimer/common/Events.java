@@ -214,21 +214,21 @@ public class Events {
                 BHT.LOG.info("Found a Melee Damage Source {} with name {}", source, source.getDamageType());
             }
             int ticksSinceLastHurt = Events.getHurtTime(target, attacker);
-            BHT.LOG.info("ticksSinceLastHurt: {}", ticksSinceLastHurt);
+            if(BHTConfig.doLogging) BHT.LOG.info("ticksSinceLastHurt: {}", ticksSinceLastHurt);
             int ticksSinceLastMelee = attackInfo.ticksSinceLastMelee;
-            BHT.LOG.info("ticksSinceLastMelee: {}", ticksSinceLastMelee);
+            if(BHTConfig.doLogging) BHT.LOG.info("ticksSinceLastMelee: {}", ticksSinceLastMelee);
             if (ticksSinceLastMelee < ticksSinceLastHurt) {
-                BHT.LOG.info("Determining whether to override or cancel...");
+                if(BHTConfig.doLogging) BHT.LOG.info("Determining whether to override or cancel...");
                 // What needs to be done to fix other peoples shit.
                 if (attackInfo.ticksSinceLastMelee == 0 && (!(attacker instanceof EntityPlayer) || ((EntityPlayer) attacker).getCooledAttackStrength(0) == 0)) {
-                    BHT.LOG.info("OVERRIDE!");
+                    if(BHTConfig.doLogging) BHT.LOG.info("OVERRIDE!");
                     attackInfo.override = true;
                 } else {
-                    BHT.LOG.info("CANCELLED!");
+                    if(BHTConfig.doLogging) BHT.LOG.info("CANCELLED!");
                     event.setCanceled(true);
                 }
             } else {
-                BHT.LOG.info("Setting ticksSinceLastMelee to 0");
+                if(BHTConfig.doLogging) BHT.LOG.info("Setting ticksSinceLastMelee to 0");
                 attackInfo.ticksSinceLastMelee = 0;
             }
         });
@@ -248,7 +248,9 @@ public class Events {
         } else {
             double maxHurtResistantTime = Events.getHurtResistantTime(target);
             double attackerAttackSpeed = Events.getAttackSpeed(attacker);
-            BHT.LOG.info("Doing the standard hurtTime calculation: {} {}", maxHurtResistantTime, attackerAttackSpeed);
+            if(BHTConfig.doLogging) {
+                BHT.LOG.info("Doing the standard hurtTime calculation: {} {}", maxHurtResistantTime, attackerAttackSpeed);
+            }
             return (int) (maxHurtResistantTime * (attackerAttackSpeed * threshold));
         }
     }
