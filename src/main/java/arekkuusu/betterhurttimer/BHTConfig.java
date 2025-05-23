@@ -70,7 +70,8 @@ public class BHTConfig {
                     "^thorns$:false:5",
                     "^explosion\\.player$:false:5",
                     "^skill$:true:20",
-                    "^indirectSkill$:true:20"
+                    "^indirectSkill$:true:20",
+                    "^tg_[\\w]+$:true:0"
             };
             @Config.RangeDouble(min = 0)
             public double nextAttackDamageDifference = 0.5D;
