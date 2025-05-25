@@ -24,6 +24,7 @@ public final class BHTAPI {
     public static final Function<EntityLivingBase, Function<CharSequence, HurtSourceInfo>> HURT_SOURCE_INFO_FUNCTION = e -> s -> new HurtSourceInfo(s, false, e.maxHurtResistantTime);
     public static final Function<HurtSourceInfo, Function<CharSequence, HurtSourceData>> HURT_SOURCE_DATA_FUNCTION = i -> s -> new HurtSourceData(i);
     public static final Object2ObjectMap<CharSequence, HurtSourceInfo> DAMAGE_SOURCE_INFO_MAP = new Object2ObjectArrayMap<>();
+    //public static final Object2ObjectMap<CharSequence, ModularHurtSourceInfo> MODULAR_DAMAGE_SOURCE_INFO_MAP = new Object2ObjectArrayMap<>();
     public static final Map<ResourceLocation, Double> ATTACK_THRESHOLD_MAP = new LinkedHashMap<>();
     public static final Map<ResourceLocation, Double> ATTACK_ITEM_THRESHOLD_MAP = new LinkedHashMap<>();
     public static final Function<Entity, AttackInfo> INFO_FUNCTION = u -> new AttackInfo();
@@ -37,6 +38,12 @@ public final class BHTAPI {
     public static void addSource(HurtSourceInfo info) {
         BHTAPI.DAMAGE_SOURCE_INFO_MAP.put(new HurtSourceInfo.HurtType(info.sourceName), info);
     }
+    /*
+    public static void addModularSource(ModularHurtSourceInfo info) {
+        BHTAPI.MODULAR_DAMAGE_SOURCE_INFO_MAP.put(new HurtSourceInfo.HurtType(info.sourceName), info);
+    }
+
+     */
 
     public static void addAttacker(ResourceLocation location, double threshold) {
         BHTAPI.ATTACK_THRESHOLD_MAP.put(location, threshold);
@@ -49,7 +56,18 @@ public final class BHTAPI {
     public static HurtSourceData get(EntityLivingBase entity, DamageSource source) {
         HurtSourceInfo info = BHTAPI.DAMAGE_SOURCE_INFO_MAP.computeIfAbsent(source.getDamageType(), BHTAPI.HURT_SOURCE_INFO_FUNCTION.apply(entity));
         return Capabilities.hurt(entity).map(c ->
-                c.hurtMap.computeIfAbsent(info.sourceName, BHTAPI.HURT_SOURCE_DATA_FUNCTION.apply(info))
+                c.hurtMap.computeIfAbsent(info.modular ? source.getDamageType() : info.sourceName, BHTAPI.HURT_SOURCE_DATA_FUNCTION.apply(info))
         ).orElseThrow(UnsupportedOperationException::new);
     }
+    /*
+    public static HurtSourceInfo computeHurtSourceInfo(EntityLivingBase e, CharSequence s){
+        // Only used if there isn't already a mapping
+        ModularHurtSourceInfo inf = MODULAR_DAMAGE_SOURCE_INFO_MAP.get(s);
+        if(inf != null){
+            return inf.getNonModular(s);
+        }
+        return new HurtSourceInfo(s, false, e.maxHurtResistantTime);
+    }
+
+     */
 }

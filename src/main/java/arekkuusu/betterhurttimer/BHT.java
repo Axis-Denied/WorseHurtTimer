@@ -32,7 +32,7 @@ public class BHT {
     //Useful names
     public static final String MOD_ID = "betterhurttimer";
     public static final String MOD_NAME = "Better Hurt Timer";
-    public static final String MOD_VERSION = "1.12.2-1.5.0.3";
+    public static final String MOD_VERSION = "1.12.2-1.5.0.4";
     public static final String SERVER_PROXY = "arekkuusu." + MOD_ID + ".common.ServerProxy";
     public static final String CLIENT_PROXY = "arekkuusu." + MOD_ID + ".client.ClientProxy";
     public static final boolean DEV = FMLLaunchHandler.isDeobfuscatedEnvironment();
@@ -70,7 +70,7 @@ public class BHT {
             if (m.matches()) {
                 BHTAPI.addAttacker(new ResourceLocation(m.group(1)), Double.parseDouble(m.group(2)));
             } else {
-                BHT.LOG.warn("[Attack Frames Config] - String " + s + " is not a valid format");
+                BHT.LOG.warn("[Attack Frames Attack Threshold Config] - String " + s + " is not a valid format");
             }
         }
         for (String s : BHTConfig.CONFIG.attackFrames.itemSource) {
@@ -78,7 +78,7 @@ public class BHT {
             if (m.matches()) {
                 BHTAPI.addItem(new ResourceLocation(m.group(1)), Double.parseDouble(m.group(2)));
             } else {
-                BHT.LOG.warn("[Attack Frames Config] - String " + s + " is not a valid format");
+                BHT.LOG.warn("[Attack Frames Item Sources Config] - String " + s + " is not a valid format");
             }
         }
     }
@@ -86,10 +86,25 @@ public class BHT {
     public void initDamageFrames() {
         String patternAttackFrames = "^(.*):(true|false):?(\\d*)";
         Pattern r = Pattern.compile(patternAttackFrames);
+        String patternModular = "^(.*):(true|false):(true|false):?(\\d*)";
+        Pattern rm = Pattern.compile(patternModular);
         for (String s : BHTConfig.CONFIG.damageFrames.damageSource) {
             Matcher m = r.matcher(s);
+            Matcher m2 = rm.matcher(s);
             if (m.matches()) {
                 BHTAPI.addSource(new HurtSourceInfo(m.group(1), Boolean.parseBoolean(m.group(2)), Integer.parseInt(m.group(3))));
+            } else if (m2.matches()) {
+                BHTAPI.addSource(new HurtSourceInfo(m2.group(1), Boolean.parseBoolean(m2.group(2)), Integer.parseInt(m2.group(4)), Boolean.parseBoolean(m2.group(3))));
+
+                /*
+                if(Boolean.parseBoolean(m2.group(4))){
+                    BHTAPI.addModularSource(new ModularHurtSourceInfo(m2.group(1), Boolean.parseBoolean(m2.group(2)), Integer.parseInt(m2.group(3))));
+                }else{
+                    BHTAPI.addSource(new HurtSourceInfo(m2.group(1), Boolean.parseBoolean(m2.group(2)), Integer.parseInt(m2.group(3))));
+                }
+
+                 */
+
             } else {
                 BHT.LOG.warn("[Damage Frames Config] - String " + s + " is not a valid format");
             }

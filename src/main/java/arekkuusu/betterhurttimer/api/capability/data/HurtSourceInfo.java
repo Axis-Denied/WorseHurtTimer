@@ -11,14 +11,20 @@ import java.util.regex.Pattern;
 public class HurtSourceInfo {
 
     public final CharSequence sourceName;
-    public final boolean doFrames;
+    public final boolean doFrames, modular;
     public final int waitTime;
 
     public HurtSourceInfo(CharSequence sourceName, boolean doFrames, int waitTime) {
+        this(sourceName, doFrames, waitTime, false);
+    }
+    public HurtSourceInfo(CharSequence sourceName, boolean doFrames, int waitTime, boolean modular) {
         this.sourceName = sourceName;
         this.doFrames = doFrames;
         this.waitTime = waitTime;
+        this.modular = modular;
     }
+
+
 
     public static class HurtType implements CharSequence {
 
